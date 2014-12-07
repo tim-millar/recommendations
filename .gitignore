@@ -1,0 +1,10 @@
+# Ignore swap files & emacs backups
+*.swp
+*~
+
+# Ignore all logfiles and tempfiles.
+/log/*.log
+/tmp
+
+# Ignore pyc files
+*.pyc
