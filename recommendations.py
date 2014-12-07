@@ -92,8 +92,8 @@ def top_matches(prefs, person, n=5, similarity=sim_pearsons):
 
 def get_recommendations(prefs, person, similarity=sim_pearsons):
     """
-    Returns: recommendations for person using weighted of every 
-    other user's rankings.
+    Returns: recommendations for person using weighted average of 
+    every other user's rankings.
     """
     totals   = defaultdict(int)
     sim_sums = defaultdict(int)
@@ -107,9 +107,23 @@ def get_recommendations(prefs, person, similarity=sim_pearsons):
                 totals[item] += prefs[other][item] * sim
                 sim_sums[item] += sim
 
-    print(totals)
-    print(sim_sums)
+    # print(totals)
+    # print(sim_sums)
 
     rankings = [(total/sim_sums[item],item) for item,total in totals.items()]
     return sorted(rankings, reverse=True)
+
+
+def transform_prefs(prefs):
+    """
+    Consumes: a dict whose keys are people and values are dicts 
+    of item: score pairs.
+    Returns: a dict whose keys are items and values are dicts of 
+    people: score pairs.
+    """
+    result = defaultdict(dict)
+    for person in prefs:
+        for item in prefs[person]:
+            result[item][person] = prefs[person][item]
+    return result
 
