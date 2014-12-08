@@ -17,6 +17,16 @@ def initialize_user_dict(tag, count=5):
             user_dict[user] = {}
     return user_dict
 
+    # user_dict, idx = {}, 0
+    # while idx < count:
+    #     post = get_popular(tag=tag)[idx]
+    #     for url in get_urlposts(post['url']):
+    #         user = url['user']
+    #         if not user: continue
+    #         user_dict[user] = {}
+    #         idx += 1
+    # return user_dict
+
 
 def fill_items(user_dict):
     """

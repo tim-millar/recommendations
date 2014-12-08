@@ -54,24 +54,26 @@ def sim_pearsons(prefs, person1, person2):
     Returns: the Pearson correlation coefficient for person1 and person2
     """
     prefs_1, prefs_2 = prefs[person1], prefs[person2]
-    shared_items = {item for item in prefs_1 if item in prefs_2}
+    shared_items     = {item for item in prefs_1 if item in prefs_2}
 
     num_elem = len(shared_items)
 
     # score 0 if no items in common
     if not shared_items: return 0
 
-    sums = lambda d, n: sum(pow(d[item], n) for item in shared_items)
-
-    sum_1 = sums(prefs_1, 1)
-    sum_2 = sums(prefs_2, 1)
-
+    sums       = lambda d, n: sum(pow(d[item], n) for item in shared_items)
+    sum_1      = sums(prefs_1, 1)
+    sum_2      = sums(prefs_2, 1)
     sum_sqrs_1 = sums(prefs_1, 2)
     sum_sqrs_2 = sums(prefs_2, 2)
 
+    # sum_1, sum_2, sum_sqrs_1, sum_sqrs_2 = (
+    #     sums(prefs_i, jdx) for jdx in (1,2) for prefs_i in (prefs_1, prefs_2)
+    # )
+
     sum_prods = sum(prefs_1[item]*prefs_2[item] for item in shared_items)
 
-    num = sum_prods - (sum_1*sum_2 / num_elem)
+    num = sum_prods - (sum_1*sum_2 / float(num_elem))
     den = sqrt((sum_sqrs_1-sum_1**2/num_elem) * (sum_sqrs_2-sum_2**2/num_elem))
 
     if not den: return 0
@@ -84,22 +86,21 @@ def top_matches(prefs, person, n=5, similarity=sim_pearsons):
     Optional params: number of results and simiarity metric.
     Returns: best matches for person from prefs.
     """
-    scores = (((similarity(prefs, person, other), other)
-               for other in prefs if other != person))
+    scores = ((other, similarity(prefs, person, other))
+               for other in prefs if other != person)
 
-    return sorted(scores, reverse=True)[:n]
+    return sorted(scores, reverse=True, key=lambda t: t[1])[:n]
 
 
 def get_recommendations(prefs, person, similarity=sim_pearsons):
     """
-    Returns: recommendations for person using weighted average of 
-    every other user's rankings.
+    Returns: list of recommendations for person using weighted 
+    average of every other user's rankings.
     """
     totals   = defaultdict(int)
     sim_sums = defaultdict(int)
 
-    for other in prefs:
-        if other == person: continue
+    for other in {k:v for k,v in prefs.items() if k != person}:
         sim = similarity(prefs, person, other)
         if sim <= 0: continue
         for item in prefs[other]:
@@ -107,11 +108,8 @@ def get_recommendations(prefs, person, similarity=sim_pearsons):
                 totals[item] += prefs[other][item] * sim
                 sim_sums[item] += sim
 
-    # print(totals)
-    # print(sim_sums)
-
-    rankings = [(total/sim_sums[item],item) for item,total in totals.items()]
-    return sorted(rankings, reverse=True)
+    rankings = ((item,total/sim_sums[item]) for item,total in totals.items())
+    return sorted(rankings, reverse=True, key=lambda t: t[1])
 
 
 def transform_prefs(prefs):
@@ -122,8 +120,10 @@ def transform_prefs(prefs):
     people: score pairs.
     """
     result = defaultdict(dict)
+
     for person in prefs:
         for item in prefs[person]:
             result[item][person] = prefs[person][item]
-    return result
+
+    return dict(result)
 

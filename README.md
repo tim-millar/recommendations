@@ -10,3 +10,5 @@ Folder contains:
 - deliciousrec.py, a module containing functions for building
   prefernce databases using the del.i.cious API.
 
+Based on a chapter in Toby Segaran's _Programming Collective
+Intelligence_ (O'Reilly, 2007).
